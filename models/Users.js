@@ -6,8 +6,6 @@ const usersSchema = new Schema(
             type: String,
             required: true,
             maxlength: 26,
-            minlength: 2,
-            default: 'Anonymous User',
             unique: true
         },
         userEmail: {
@@ -28,14 +26,15 @@ const usersSchema = new Schema(
     {
         toJSON: {
             getters: true,
+            virtuals: true,
         },
         id: false
     });
 
 usersSchema
-    .virtual('friendCount')
+    .virtual('friendsCount')
     .get(function () {
-        return this.userFriends.length;
+        return this.friends.length;
     });
 
 const Users = model('Users', usersSchema)
