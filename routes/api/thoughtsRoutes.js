@@ -10,22 +10,15 @@ const {
 } = require('../../controllers/thoughtsController')
 
 router
-    .route('/')
-    .get(getThoughts)
-    .post(createThoughts)
+    .route('/').get(getThoughts).post(createThoughts)
 
 router
-    .route('/:id')
-    .get(getSingleThought)
-    .put(updateThoughts)
-    .delete(deleteThoughts)
+    .route('/:thoughtsId').get(getSingleThought).put(updateThoughts).delete(deleteThoughts)
 
 router
-    .route('/:thoughtsId/reactions')
-    .post(addReaction)
+    .route('/:thoughtsId/reactions').post(addReaction)
 
 router
-    .route('/:thoughtsId/:reactionsId')
-    .delete(removeReaction)
+    .route('/:thoughtsId/reactions/:reactionsId').delete(removeReaction)
 
 module.exports = router;

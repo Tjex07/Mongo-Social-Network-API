@@ -1,4 +1,5 @@
-const { Users, Thoughts } = require('../models');
+const { Users, Thoughts, } = require('../models');
+const { ObjectId } = require('mongoose').Types;
 
 const usersController = {
   // Get all users
@@ -10,68 +11,69 @@ const usersController = {
   },
   // Get a User
   getSingleUser(req, res) {
-    Users.findOne({ _id: req.params.userID })
+    Users.findOne
+      ({
+        _id: req.params.usersId
+      })
       .select('-__v')
-      .populate('friends')
-      .populate('thoughts')
-      .then(dbUserData => res.json(dbUserData))
-
-    !Users
-      ? res.status(404).json({ message: 'No User with that ID' })
-      : res.json(Users)
-
-        .catch((err) => res.status(500).json(err));
+      .populate('userFriends')
+      .populate('userThoughts')
+      .then((dbUsersData) => {
+        if (!dbUsersData) {
+          return res.status(400).json({
+            message: 'This ID is invalid.'
+          });
+        }
+        res.json(dbUsersData);
+      })
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
+
   // Create a User
-  // createUser(req, res) {
-  //   Users.create(req.body)
-  //     .then((dbUserData) => {
-  //       res.json(dbUserData);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //       return res.status(596).json(err);
-  //     });
-  // },
   createUser(req, res) {
+    console.log(req.body)
     Users.create(req.body)
       .then((dbUserData) => res.json(dbUserData))
-      .catch((err) => res.status(500).json(err));
+      .catch((err) => console.log(err));
   },
 
   // Delete a User
   deleteUser(req, res) {
-    Users.findOneAndDelete({ _id: req.params.userID })
-      .then((dbUserData) => res.json(dbUserData))
-    !Users
-      ? res.status(404).json({ message: 'No Users with that ID' })
-      : Users.deleteMany({ _id: { $in: Users.userName } })
-
-        .then(() => res.json({ message: 'User deleted!' }))
-        .catch((err) => res.status(500).json(err));
+    Users.deleteOne({
+      _id: req.params.usersId
+    })
+      .then(
+        res.json('User successfully deleted!')
+      )
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
   // Update a User
   updateUser(req, res) {
     Users.findOneAndUpdate(
-      { _id: req.params.userID },
-      { $set: req.body },
-      { runValidators: true, new: true }
-    )
-      .then(() =>
-        !course
-          ? res.status(404).json({ message: 'No user with this id!' })
-          : res.json(course)
+      { _id: req.params.usersId },
+      req.body, { runValidators: true, new: true })
+      .then(
+        res.json('User successfully updated!')
       )
-      .catch((err) => res.status(500).json(err));
+
+      .catch((err) => {
+        console.log(err);
+        res.status(500).json(err);
+      });
   },
+
 
   // Add a friend to user
   addFriend(req, res) {
-    console.log('You are adding a friend');
-    console.log(req.body);
     Users.findOneAndUpdate(
-      { _id: req.params.userID },
-      { $addToSet: { friends: req.params.friendID } },
+      { _id: req.params.userId },
+      { $addToSet: { userFriends: req.params.friendId } },
       { runValidators: true, new: true }
     )
       .then((Users) =>
@@ -86,8 +88,8 @@ const usersController = {
   // Remove a friend from user
   removeFriend(req, res) {
     Users.findOneAndUpdate(
-      { _id: req.params.friendsID },
-      { $pull: { friends: { friendID: req.params.friendID } } },
+      { _id: req.params.friendId },
+      { $pull: { userFriends: { friendId: req.params.friendId } } },
       { runValidators: true, new: true }
     )
       .then((Users) =>

@@ -19,8 +19,7 @@ const ThoughtsSchema = new Schema(
         userName: {
             type: String,
             required: true,
-            unique: true,
-            ref: 'Users'
+        
         },
         reactions: [ReactionsSchema],
     }, 
